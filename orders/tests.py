@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
+from django.db import IntegrityError, transaction
 from django.test import TestCase
 from django.urls import reverse
 
@@ -70,6 +71,7 @@ class OrderSubmissionTests(TestCase):
                 "sample_type": "组织",
                 "project_type": Order.ProjectType.TRANSCRIPTOME,
                 "status": Order.Status.COMPLETED,
+                "amount_cents": 1,
                 "user": get_user_model().objects.create_user(
                     username="other-user", password="A-safe-passphrase-923!"
                 ).pk,
@@ -81,6 +83,7 @@ class OrderSubmissionTests(TestCase):
         self.assertEqual(order.user, self.user)
         self.assertEqual(order.status, Order.Status.SHIPPED)
         self.assertEqual(order.project_type, Order.ProjectType.TRANSCRIPTOME)
+        self.assertEqual(order.amount_cents, 20000)
 
     def test_invalid_submission_does_not_create_order(self):
         self.client.force_login(self.user)
@@ -139,6 +142,9 @@ class OrderHistoryTests(TestCase):
         self.assertQuerySetEqual(response.context["orders"], [newer, older])
         self.assertContains(response, "我的新样本")
         self.assertContains(response, "已接收")
+        self.assertContains(response, "订单金额")
+        self.assertContains(response, "¥150.00")
+        self.assertContains(response, "¥200.00")
         self.assertNotContains(response, "其他用户样本")
 
     def test_history_has_an_actionable_empty_state(self):
@@ -157,6 +163,7 @@ class OrderHistoryTests(TestCase):
                     sample_name=f"样本 {index:02d}",
                     sample_type="血液",
                     project_type=Order.ProjectType.AMPLICON,
+                    amount_cents=15000,
                 )
                 for index in range(21)
             ]
@@ -198,3 +205,47 @@ class OrderAdminTests(TestCase):
         self.assertEqual(
             Order.objects.get(pk=order.pk).status, Order.Status.COMPLETED
         )
+
+
+class OrderAmountTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = get_user_model().objects.create_user(username="amount-owner")
+
+    def test_default_amount_is_persisted_for_each_project_type(self):
+        for project_type, expected in (
+            (Order.ProjectType.AMPLICON, 15000),
+            (Order.ProjectType.TRANSCRIPTOME, 20000),
+        ):
+            with self.subTest(project_type=project_type):
+                order = Order.objects.create(
+                    user=self.user, sample_name="金额测试", sample_type="组织",
+                    project_type=project_type,
+                )
+                order.refresh_from_db()
+                self.assertEqual(order.amount_cents, expected)
+                self.assertIsInstance(order.amount_cents, int)
+                order.status = Order.Status.RECEIVED
+                order.save(update_fields=["status"])
+                order.refresh_from_db()
+                self.assertEqual(order.amount_cents, expected)
+
+    def test_explicit_amount_including_zero_is_preserved_and_formatted(self):
+        for amount, display in ((0, "0.00"), (15001, "150.01"), (20099, "200.99")):
+            with self.subTest(amount=amount):
+                order = Order.objects.create(
+                    user=self.user, sample_name="自定义金额", sample_type="组织",
+                    project_type=Order.ProjectType.AMPLICON, amount_cents=amount,
+                )
+                order.project_type = Order.ProjectType.TRANSCRIPTOME
+                order.save()
+                order.refresh_from_db()
+                self.assertEqual(order.amount_cents, amount)
+                self.assertEqual(order.amount_display, display)
+
+    def test_negative_amount_is_rejected_by_database(self):
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            Order.objects.create(
+                user=self.user, sample_name="非法金额", sample_type="组织",
+                project_type=Order.ProjectType.AMPLICON, amount_cents=-1,
+            )

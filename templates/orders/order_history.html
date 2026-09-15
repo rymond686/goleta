@@ -30,6 +30,7 @@
                         <th scope="col">样本名称</th>
                         <th scope="col">样本类型</th>
                         <th scope="col">项目类型</th>
+                        <th scope="col">订单金额（人民币）</th>
                         <th scope="col">订单状态</th>
                         <th scope="col">提交时间</th>
                     </tr>
@@ -40,6 +41,7 @@
                             <th scope="row" data-label="样本名称">{{ order.sample_name }}</th>
                             <td data-label="样本类型">{{ order.sample_type }}</td>
                             <td data-label="项目类型">{{ order.get_project_type_display }}</td>
+                            <td data-label="订单金额">¥{{ order.amount_display }}</td>
                             <td data-label="订单状态">{% include "orders/partials/status_badge.html" with order=order %}</td>
                             <td data-label="提交时间"><time datetime="{{ order.created_at|date:'c' }}">{{ order.created_at|date:"Y-m-d H:i" }}</time></td>
                         </tr>

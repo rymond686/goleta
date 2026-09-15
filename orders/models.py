@@ -23,6 +23,10 @@ class Order(models.Model):
     project_type = models.CharField(
         "项目类型", max_length=20, choices=ProjectType.choices
     )
+    amount_cents = models.PositiveIntegerField(
+        "订单金额（人民币分）", blank=True,
+        help_text="留空按项目定价：扩增子 15000 分，转录组 20000 分。",
+    )
     status = models.CharField(
         "订单状态", max_length=24, choices=Status.choices, default=Status.SHIPPED
     )
@@ -35,3 +39,17 @@ class Order(models.Model):
 
     def __str__(self):
         return f"{self.sample_name} · {self.get_project_type_display()}"
+
+    def save(self, **kwargs):
+        # 保存订单时确定价格；之后修改状态或项目类型不重算已有金额。
+        if self.amount_cents is None:
+            self.amount_cents = {
+                self.ProjectType.AMPLICON: 15000,
+                self.ProjectType.TRANSCRIPTOME: 20000,
+            }[self.project_type]
+        super().save(**kwargs)
+
+    @property
+    def amount_display(self):
+        yuan, cents = divmod(self.amount_cents, 100)
+        return f"{yuan}.{cents:02d}"
