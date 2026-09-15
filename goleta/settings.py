@@ -128,7 +128,7 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'home'
+LOGIN_REDIRECT_URL = 'order-create'
 LOGOUT_REDIRECT_URL = 'login'
 
 SECURE_CSP = {

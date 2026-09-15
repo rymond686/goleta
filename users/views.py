@@ -1,7 +1,6 @@
 from hashlib import sha256
 
 from django.contrib.auth import login
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.core.cache import cache
 from django.shortcuts import redirect, render
@@ -68,17 +67,12 @@ class RateLimitedLoginView(LoginView):
 @require_http_methods(["GET", "POST"])
 def register(request):
     if request.user.is_authenticated:
-        return redirect("home")
+        return redirect("order-create")
 
     form = RegistrationForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         user = form.save()
         login(request, user)
-        return redirect("home")
+        return redirect("order-create")
 
     return render(request, "registration/register.html", {"form": form})
-
-
-@login_required
-def home(request):
-    return render(request, "home.html")

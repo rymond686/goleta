@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block html_lang %}zh-CN{% endblock %}
+{% block title %}历史订单 | Goleta{% endblock %}
+
+{% block content %}
+<main id="main-content">
+    <h1>历史订单</h1>
+    {% for message in messages %}<p role="status">{{ message }}</p>{% endfor %}
+    {% if orders %}
+        <ul>
+            {% for order in orders %}
+                <li>{{ order.sample_name }} · {{ order.sample_type }} · {{ order.get_project_type_display }} · {{ order.get_status_display }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <h2>暂无历史订单</h2>
+        <a href="{% url 'order-create' %}">提交第一个订单</a>
+    {% endif %}
+</main>
+{% endblock %}

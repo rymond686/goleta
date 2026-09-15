@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block html_lang %}zh-CN{% endblock %}
+{% block title %}提交新订单 | Goleta{% endblock %}
+
+{% block content %}
+<main id="main-content">
+    <h1>提交新订单</h1>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">提交订单</button>
+    </form>
+</main>
+{% endblock %}
