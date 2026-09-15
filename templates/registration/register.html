@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Create your account | Goleta{% endblock %}
+
+{% block content %}
+<main class="container py-5">
+    <h1>Create your account</h1>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button class="btn btn-primary" type="submit">Create account</button>
+    </form>
+    <a href="{% url 'login' %}">Already registered? Sign in</a>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/vue@3.5.42/dist/vue.global.prod.js" defer crossorigin="anonymous"></script>
+{% endblock %}
