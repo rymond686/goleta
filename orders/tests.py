@@ -45,6 +45,14 @@ class OrderSubmissionTests(TestCase):
         self.assertContains(response, self.user.username)
         self.assertContains(response, reverse("order-history"))
 
+    def test_project_type_prompt_is_localized(self):
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse("order-create"))
+
+        self.assertContains(response, "请选择项目类型")
+        self.assertNotContains(response, "- Select an option -")
+
     def test_valid_submission_creates_order_for_current_user(self):
         self.client.force_login(self.user)
 

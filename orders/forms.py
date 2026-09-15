@@ -31,3 +31,11 @@ class OrderSubmissionForm(forms.ModelForm):
                 attrs={"class": "form-select order-control"}
             ),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        project_type = self.fields["project_type"]
+        project_type.choices = [
+            ("", "请选择项目类型"),
+            *list(project_type.choices)[1:],
+        ]

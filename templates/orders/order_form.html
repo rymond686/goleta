@@ -1,15 +1,83 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block html_lang %}zh-CN{% endblock %}
 {% block title %}提交新订单 | Goleta{% endblock %}
+{% block body_class %}workspace-body{% endblock %}
+{% block styles %}<link rel="stylesheet" href="{% static 'css/orders.css' %}">{% endblock %}
 
 {% block content %}
-<main id="main-content">
-    <h1>提交新订单</h1>
-    <form method="post" novalidate>
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">提交订单</button>
-    </form>
+<main id="main-content" class="order-main">
+    <div class="order-layout">
+        <section class="order-panel" aria-labelledby="order-title">
+            <p class="eyebrow">Sample submission</p>
+            <h1 id="order-title">提交新订单</h1>
+            <p class="order-intro">填写样本与项目资料。提交后可在历史订单中跟踪处理进度。</p>
+
+            {% if form.non_field_errors %}
+                <div class="auth-alert" role="alert">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <form class="order-form" method="post" novalidate>
+                {% csrf_token %}
+                <div class="order-field{% if form.sample_name.errors %} order-field--error{% endif %}">
+                    <label for="{{ form.sample_name.id_for_label }}">样本名称</label>
+                    {{ form.sample_name }}
+                    <p class="field-help">用于区分本次送检样本，建议包含编号。</p>
+                    {% if form.sample_name.errors %}<div class="field-errors" role="alert">{{ form.sample_name.errors }}</div>{% endif %}
+                </div>
+
+                <div class="order-field{% if form.sample_type.errors %} order-field--error{% endif %}">
+                    <label for="{{ form.sample_type.id_for_label }}">样本类型</label>
+                    {{ form.sample_type }}
+                    <p class="field-help">填写样本来源或材料类型。</p>
+                    {% if form.sample_type.errors %}<div class="field-errors" role="alert">{{ form.sample_type.errors }}</div>{% endif %}
+                </div>
+
+                <fieldset class="order-field{% if form.project_type.errors %} order-field--error{% endif %}">
+                    <legend>项目类型</legend>
+                    {{ form.project_type }}
+                    {% if form.project_type.errors %}<div class="field-errors" role="alert">{{ form.project_type.errors }}</div>{% endif %}
+                </fieldset>
+
+                <div class="default-status" role="note">
+                    <i class="bi bi-box-seam" aria-hidden="true"></i>
+                    <div>
+                        <span>初始订单状态</span>
+                        <strong>已寄送</strong>
+                    </div>
+                </div>
+
+                <div class="order-actions">
+                    <button class="btn auth-submit" type="submit">提交订单</button>
+                    <a href="{% url 'order-history' %}">查看历史订单</a>
+                </div>
+            </form>
+        </section>
+
+        <aside class="order-guide" aria-labelledby="guide-title">
+            <p class="eyebrow">Order journey</p>
+            <h2 id="guide-title">样本处理流程</h2>
+            <p>从寄送到完成，每个阶段都会显示在订单记录中。</p>
+            <ol class="status-timeline">
+                <li class="status-timeline__item status-timeline__item--active">
+                    <span class="status-timeline__icon"><i class="bi bi-send" aria-hidden="true"></i></span>
+                    <div><strong>已寄送</strong><span>订单提交后的默认状态</span></div>
+                </li>
+                <li class="status-timeline__item">
+                    <span class="status-timeline__icon"><i class="bi bi-inbox" aria-hidden="true"></i></span>
+                    <div><strong>已接收</strong><span>实验室确认收到样本</span></div>
+                </li>
+                <li class="status-timeline__item">
+                    <span class="status-timeline__icon"><i class="bi bi-beaker" aria-hidden="true"></i></span>
+                    <div><strong>开始实验</strong><span>样本进入实验流程</span></div>
+                </li>
+                <li class="status-timeline__item">
+                    <span class="status-timeline__icon"><i class="bi bi-check2" aria-hidden="true"></i></span>
+                    <div><strong>已完成</strong><span>项目处理完成</span></div>
+                </li>
+            </ol>
+        </aside>
+    </div>
 </main>
 {% endblock %}

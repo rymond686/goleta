@@ -1,21 +1,67 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block html_lang %}zh-CN{% endblock %}
 {% block title %}历史订单 | Goleta{% endblock %}
+{% block body_class %}workspace-body{% endblock %}
+{% block styles %}<link rel="stylesheet" href="{% static 'css/orders.css' %}">{% endblock %}
 
 {% block content %}
-<main id="main-content">
-    <h1>历史订单</h1>
-    {% for message in messages %}<p role="status">{{ message }}</p>{% endfor %}
+<main id="main-content" class="history-main">
+    <div class="history-heading">
+        <div>
+            <p class="eyebrow">Order history</p>
+            <h1>历史订单</h1>
+            <p>查看已提交样本及当前处理状态。</p>
+        </div>
+        <a class="btn history-create" href="{% url 'order-create' %}"><i class="bi bi-plus-lg" aria-hidden="true"></i> 提交新订单</a>
+    </div>
+
+    {% for message in messages %}
+        <div class="order-notice" role="status"><i class="bi bi-check-circle-fill" aria-hidden="true"></i> {{ message }}</div>
+    {% endfor %}
+
     {% if orders %}
-        <ul>
-            {% for order in orders %}
-                <li>{{ order.sample_name }} · {{ order.sample_type }} · {{ order.get_project_type_display }} · {{ order.get_status_display }}</li>
-            {% endfor %}
-        </ul>
+        <div class="order-table-wrap">
+            <table class="order-table">
+                <caption class="visually-hidden">当前用户的历史订单</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">样本名称</th>
+                        <th scope="col">样本类型</th>
+                        <th scope="col">项目类型</th>
+                        <th scope="col">订单状态</th>
+                        <th scope="col">提交时间</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                        <tr>
+                            <th scope="row" data-label="样本名称">{{ order.sample_name }}</th>
+                            <td data-label="样本类型">{{ order.sample_type }}</td>
+                            <td data-label="项目类型">{{ order.get_project_type_display }}</td>
+                            <td data-label="订单状态">{% include "orders/partials/status_badge.html" with order=order %}</td>
+                            <td data-label="提交时间"><time datetime="{{ order.created_at|date:'c' }}">{{ order.created_at|date:"Y-m-d H:i" }}</time></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if is_paginated %}
+            <nav class="order-pagination" aria-label="历史订单分页">
+                {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}">上一页</a>{% endif %}
+                <span>第 {{ page_obj.number }} / {{ page_obj.paginator.num_pages }} 页</span>
+                {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}">下一页</a>{% endif %}
+            </nav>
+        {% endif %}
     {% else %}
-        <h2>暂无历史订单</h2>
-        <a href="{% url 'order-create' %}">提交第一个订单</a>
+        <section class="order-empty" aria-labelledby="empty-title">
+            <i class="bi bi-clipboard2" aria-hidden="true"></i>
+            <h2 id="empty-title">暂无历史订单</h2>
+            <p>提交第一个样本后，可在这里查看订单状态。</p>
+            <a class="btn history-create" href="{% url 'order-create' %}">提交第一个订单</a>
+        </section>
     {% endif %}
 </main>
 {% endblock %}
