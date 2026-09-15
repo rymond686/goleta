@@ -1,0 +1,39 @@
+Goleta 生物信息订单系统
+========================
+
+一、项目描述
+------------
+这是一个基于 Django 的生物信息订单系统，用于用户提交样本检测订单、查看历史订单，
+并由管理员在后台维护订单状态。
+
+二、代码结构
+------------
+goleta/                  Django 项目配置、路由和全局设置
+users/                   用户注册、登录、退出及认证相关逻辑
+orders/                  订单模型、表单、业务服务、查询、视图、后台和测试
+templates/               Django 模板（认证页和订单页）
+static/                  CSS、JavaScript 及前端静态资源
+design/                  产品设计参考图与设计验收记录
+manage.py                Django 管理命令入口
+requirements.txt         Python 运行依赖
+
+三、已完成功能
+--------------
+1. 用户注册、登录和退出，使用 Django 内置 User 数据模型。
+2. 登录状态在页面右上角展示，并提供订单操作入口。
+3. 用户提交订单，包含样本名称、样本类型和项目类型（扩增子、转录组）。
+4. 订单默认状态为“已寄送”，支持“已接收”“开始实验”“已完成”状态。
+5. 用户只能查看自己的历史订单，历史列表支持分页。
+6. Django Admin 已注册 Order 模型；管理员可筛选、搜索订单，并直接更新订单状态。
+7. 前端使用 Django 模板引擎、Vue 渐进增强和 Bootstrap，按职责拆分前后端模块。
+
+四、本地运行
+------------
+在项目目录执行：
+
+    .env/bin/python manage.py migrate
+    .env/bin/python manage.py createsuperuser
+    .env/bin/python manage.py runserver
+
+然后访问 http://127.0.0.1:8000/，管理员后台地址为
+http://127.0.0.1:8000/admin/。

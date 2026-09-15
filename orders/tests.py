@@ -1,8 +1,10 @@
+from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
 from .models import Order
+from .admin import OrderAdmin
 
 
 class OrderModelTests(TestCase):
@@ -22,6 +24,11 @@ class OrderModelTests(TestCase):
         self.assertEqual(order.status, Order.Status.SHIPPED)
         self.assertEqual(order.get_project_type_display(), "扩增子")
         self.assertEqual(order.get_status_display(), "已寄送")
+
+    def test_order_admin_is_registered_and_status_is_editable(self):
+        self.assertIsInstance(admin.site._registry[Order], OrderAdmin)
+        self.assertIn("status", OrderAdmin.list_editable)
+        self.assertNotIn("status", OrderAdmin.readonly_fields)
 
 
 class OrderSubmissionTests(TestCase):
@@ -160,3 +167,34 @@ class OrderHistoryTests(TestCase):
 
         self.assertEqual(len(response.context["orders"]), 20)
         self.assertTrue(response.context["is_paginated"])
+
+
+class OrderAdminTests(TestCase):
+    def test_staff_user_can_update_order_status_in_admin(self):
+        admin_user = get_user_model().objects.create_superuser(
+            username="site-admin", password="A-safe-passphrase-923!"
+        )
+        order = Order.objects.create(
+            user=admin_user,
+            sample_name="待更新样本",
+            sample_type="血液",
+            project_type=Order.ProjectType.AMPLICON,
+        )
+        self.client.force_login(admin_user)
+
+        response = self.client.post(
+            reverse("admin:orders_order_change", args=[order.pk]),
+            {
+                "user": admin_user.pk,
+                "sample_name": order.sample_name,
+                "sample_type": order.sample_type,
+                "project_type": order.project_type,
+                "status": Order.Status.COMPLETED,
+                "_save": "保存",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            Order.objects.get(pk=order.pk).status, Order.Status.COMPLETED
+        )
