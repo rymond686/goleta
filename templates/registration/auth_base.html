@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block body_class %}auth-body{% endblock %}
+
+{% block content %}
+<main id="main-content" class="auth-main" data-auth-app data-mode="{% block auth_mode %}{% endblock %}">
+    <div class="auth-layout">
+        <section class="auth-form-column" aria-labelledby="auth-title">
+            {% block auth_content %}{% endblock %}
+        </section>
+
+        <aside class="auth-benefits" id="product" aria-labelledby="benefits-title">
+            <p class="eyebrow">A better way to work</p>
+            <h2 id="benefits-title">Built for what’s next</h2>
+            <p class="benefits-intro">Goleta helps you stay organized, move faster, and do your best work — all in one place.</p>
+
+            <div class="benefit-list">
+                <section class="benefit-item">
+                    <i class="bi bi-people benefit-icon benefit-icon--blue" aria-hidden="true"></i>
+                    <div>
+                        <h3>Work together with ease</h3>
+                        <p>Keep your team aligned and accomplish more, together.</p>
+                    </div>
+                </section>
+                <section class="benefit-item" id="security">
+                    <i class="bi bi-shield-check benefit-icon benefit-icon--blue" aria-hidden="true"></i>
+                    <div>
+                        <h3>Your data stays yours</h3>
+                        <p>Built with security and privacy at the core.</p>
+                    </div>
+                </section>
+                <section class="benefit-item">
+                    <i class="bi bi-feather benefit-icon benefit-icon--green" aria-hidden="true"></i>
+                    <div>
+                        <h3>A simpler, more focused day</h3>
+                        <p>Less busywork. More progress on what matters.</p>
+                    </div>
+                </section>
+            </div>
+
+            <blockquote class="auth-quote" id="support">
+                <p>“Goleta helps our team stay focused and move faster.”</p>
+                <footer>— Product team</footer>
+            </blockquote>
+        </aside>
+    </div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/vue@3.5.42/dist/vue.global.prod.js" defer crossorigin="anonymous"></script>
+<script src="{% static 'js/auth.js' %}" defer></script>
+{% endblock %}

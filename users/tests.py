@@ -15,6 +15,14 @@ class RegistrationTests(TestCase):
         self.assertContains(response, "bootstrap@5.3.8")
         self.assertContains(response, "vue@3.5.42")
 
+    def test_auth_markup_uses_csp_compatible_vue_hooks(self):
+        response = self.client.get("/accounts/register/")
+
+        self.assertContains(response, "data-auth-app")
+        self.assertContains(response, 'data-password-input="password"')
+        self.assertNotContains(response, "v-model=")
+        self.assertNotContains(response, "@click=")
+
     def test_valid_registration_creates_and_logs_in_user(self):
         response = self.client.post(
             "/accounts/register/",
@@ -51,6 +59,21 @@ class RegistrationTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "A user with that username already exists.")
         self.assertEqual(get_user_model().objects.count(), 1)
+
+    def test_username_length_matches_the_displayed_guidance(self):
+        response = self.client.post(
+            "/accounts/register/",
+            {
+                "username": "ab",
+                "email": "short-name@example.com",
+                "password1": "A-safe-passphrase-923!",
+                "password2": "A-safe-passphrase-923!",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Ensure this value has at least 3 characters")
+        self.assertFalse(get_user_model().objects.filter(username="ab").exists())
 
     def test_registration_requires_csrf_token(self):
         csrf_client = Client(enforce_csrf_checks=True)

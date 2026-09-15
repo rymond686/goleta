@@ -1,23 +1,49 @@
-{% extends "base.html" %}
+{% extends "registration/auth_base.html" %}
 
 {% block title %}Sign in | Goleta{% endblock %}
+{% block auth_mode %}login{% endblock %}
+{% block account_nav %}<a class="site-nav__action" href="{% url 'register' %}">Create account</a>{% endblock %}
 
-{% block content %}
-<main class="container py-5">
-    <h1>Welcome back</h1>
+{% block auth_content %}
+    <p class="eyebrow">Welcome back</p>
+    <h1 id="auth-title">Sign in to Goleta</h1>
+    <div class="step-heading">
+        <span>Your workspace awaits</span>
+        <span>Secure sign in</span>
+    </div>
+    <div class="step-progress" role="progressbar" aria-label="Sign-in progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><span></span></div>
+    <p class="form-intro">Use your account details to continue.</p>
+
     {% if rate_limited %}
-        <div class="alert alert-danger" role="alert">Too many sign-in attempts. Try again in five minutes.</div>
+        <div class="auth-alert" role="alert"><i class="bi bi-clock-history" aria-hidden="true"></i> Too many sign-in attempts. Try again in five minutes.</div>
+    {% elif form.non_field_errors %}
+        <div class="auth-alert" role="alert">Your username or password is incorrect. Please try again.</div>
     {% endif %}
-    <form method="post" novalidate>
-        {% csrf_token %}
-        {{ form.as_p }}
-        {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
-        <button class="btn btn-primary" type="submit">Sign in</button>
-    </form>
-    <a href="{% url 'register' %}">New to Goleta? Create an account</a>
-</main>
-{% endblock %}
 
-{% block scripts %}
-<script src="https://unpkg.com/vue@3.5.42/dist/vue.global.prod.js" defer crossorigin="anonymous"></script>
+    <form class="auth-form auth-form--login" method="post" novalidate>
+        {% csrf_token %}
+        <div class="auth-field{% if form.username.errors %} auth-field--error{% endif %}">
+            <label for="{{ form.username.id_for_label }}">Username</label>
+            {{ form.username }}
+            {% if form.username.errors %}<div class="field-errors" id="username-errors" role="alert">{{ form.username.errors }}</div>{% endif %}
+        </div>
+
+        <div class="auth-field{% if form.password.errors %} auth-field--error{% endif %}">
+            <div class="field-label-row">
+                <label for="{{ form.password.id_for_label }}">Password</label>
+            </div>
+            <div class="password-wrap">
+                {{ form.password }}
+                <button class="password-toggle" type="button" data-password-toggle="id_password" data-password-state="showLoginPassword" aria-pressed="false">
+                    <i class="bi bi-eye" aria-hidden="true"></i>
+                    <span data-toggle-label>Show</span>
+                </button>
+            </div>
+            {% if form.password.errors %}<div class="field-errors" id="password-errors" role="alert">{{ form.password.errors }}</div>{% endif %}
+        </div>
+
+        {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+        <button class="btn auth-submit" type="submit">Sign in</button>
+    </form>
+    <p class="auth-switch">New to Goleta? <a href="{% url 'register' %}">Create an account</a></p>
 {% endblock %}

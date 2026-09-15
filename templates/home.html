@@ -1,14 +1,18 @@
 {% extends "base.html" %}
 
 {% block title %}Home | Goleta{% endblock %}
+{% block body_class %}home-body{% endblock %}
 
 {% block content %}
-<main class="container py-5">
-    <h1>Welcome, {{ user.username }}</h1>
-    <p>You are signed in.</p>
-    <form method="post" action="{% url 'logout' %}">
-        {% csrf_token %}
-        <button class="btn btn-outline-primary" type="submit">Sign out</button>
-    </form>
+<main id="main-content" class="home-main">
+    <section class="home-welcome" aria-labelledby="welcome-title">
+        <p class="eyebrow">Your workspace</p>
+        <h1 id="welcome-title">Welcome, {{ user.username }}</h1>
+        <p>You’re signed in and ready for what’s next.</p>
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button class="btn home-signout" type="submit">Sign out</button>
+        </form>
+    </section>
 </main>
 {% endblock %}

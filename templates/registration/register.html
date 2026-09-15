@@ -1,19 +1,77 @@
-{% extends "base.html" %}
+{% extends "registration/auth_base.html" %}
 
 {% block title %}Create your account | Goleta{% endblock %}
+{% block auth_mode %}register{% endblock %}
 
-{% block content %}
-<main class="container py-5">
-    <h1>Create your account</h1>
-    <form method="post" novalidate>
+{% block auth_content %}
+    <p class="eyebrow">Join Goleta</p>
+    <h1 id="auth-title">Create your account</h1>
+    <div class="step-heading">
+        <span>One quick step</span>
+        <span>Account details</span>
+    </div>
+    <div class="step-progress" role="progressbar" aria-label="Registration progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
+        <span></span>
+    </div>
+    <p class="form-intro">Create your account to get started with Goleta.</p>
+
+    {% if form.non_field_errors %}
+        <div class="auth-alert" role="alert">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <form class="auth-form" method="post" novalidate>
         {% csrf_token %}
-        {{ form.as_p }}
-        <button class="btn btn-primary" type="submit">Create account</button>
-    </form>
-    <a href="{% url 'login' %}">Already registered? Sign in</a>
-</main>
-{% endblock %}
+        <div class="auth-field{% if form.username.errors %} auth-field--error{% endif %}">
+            <label for="{{ form.username.id_for_label }}">Username</label>
+            {{ form.username }}
+            <p class="field-help" id="username-help">Use 3–30 characters. Letters, numbers, and @/./+/-/_ only.</p>
+            {% if form.username.errors %}<div class="field-errors" id="username-errors" role="alert">{{ form.username.errors }}</div>{% endif %}
+        </div>
 
-{% block scripts %}
-<script src="https://unpkg.com/vue@3.5.42/dist/vue.global.prod.js" defer crossorigin="anonymous"></script>
+        <div class="auth-field{% if form.email.errors %} auth-field--error{% endif %}">
+            <label for="{{ form.email.id_for_label }}">Email address</label>
+            {{ form.email }}
+            <p class="field-help" id="email-help">We’ll never share your email.</p>
+            {% if form.email.errors %}<div class="field-errors" id="email-errors" role="alert">{{ form.email.errors }}</div>{% endif %}
+        </div>
+
+        <div class="auth-field{% if form.password1.errors %} auth-field--error{% endif %}">
+            <label for="{{ form.password1.id_for_label }}">Password</label>
+            <div class="password-wrap">
+                {{ form.password1 }}
+                <button class="password-toggle" type="button" data-password-toggle="id_password1" data-password-state="showPassword" aria-pressed="false">
+                    <i class="bi bi-eye" aria-hidden="true"></i>
+                    <span data-toggle-label>Show</span>
+                </button>
+            </div>
+            <div class="password-guide" id="password1-help">
+                <div class="password-meter-row">
+                    <progress class="password-meter" value="0" max="4" data-strength-meter aria-label="Password strength"></progress>
+                    <span class="password-strength" data-strength-label aria-live="polite">Enter a password</span>
+                </div>
+                <ul class="password-rules" aria-label="Password guidance">
+                    <li><i class="bi bi-circle" data-password-rule="length" aria-hidden="true"></i> At least 8 characters</li>
+                    <li><i class="bi bi-circle" data-password-rule="mixed" aria-hidden="true"></i> Use a mix of letters and numbers</li>
+                    <li><i class="bi bi-info-circle" aria-hidden="true"></i> Avoid common passwords and account details</li>
+                </ul>
+            </div>
+            {% if form.password1.errors %}<div class="field-errors" id="password1-errors" role="alert">{{ form.password1.errors }}</div>{% endif %}
+        </div>
+
+        <div class="auth-field{% if form.password2.errors %} auth-field--error{% endif %}">
+            <label for="{{ form.password2.id_for_label }}">Confirm password</label>
+            <div class="password-wrap">
+                {{ form.password2 }}
+                <button class="password-toggle" type="button" data-password-toggle="id_password2" data-password-state="showPasswordConfirmation" aria-pressed="false">
+                    <i class="bi bi-eye" aria-hidden="true"></i>
+                    <span data-toggle-label>Show</span>
+                </button>
+            </div>
+            <p class="field-help password-match" id="password2-help" data-password-match aria-live="polite">Repeat your password.</p>
+            {% if form.password2.errors %}<div class="field-errors" id="password2-errors" role="alert">{{ form.password2.errors }}</div>{% endif %}
+        </div>
+
+        <button class="btn auth-submit" type="submit">Create account</button>
+    </form>
+    <p class="auth-switch">Already registered? <a href="{% url 'login' %}">Sign in</a></p>
 {% endblock %}
